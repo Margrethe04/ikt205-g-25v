@@ -45,7 +45,6 @@ export default function ExploreScreen() {
   const [userId, setUserId] = useState<string | null>(null);
   const [status, setStatus] = useState<string>("");
 
-  // Image + upload state
   const [stagedImage, setStagedImage] = useState<PickedImage | null>(null);
   const [uploading, setUploading] = useState(false);
 
