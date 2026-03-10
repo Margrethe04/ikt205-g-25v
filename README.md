@@ -1,50 +1,51 @@
-# Welcome to your Expo app 👋
+# IKT205-G 26V - Assignment 2: Cloud Notes
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Dette prosjektet er videreutvikling av Cloud Notes for Blodroed Consulting.
+Appen bruker Supabase for autentisering og database.
 
-## Get started
 
-1. Install dependencies
+## Krav (avkrysning)
 
-   ```bash
-   npm install
-   ```
+### Autentisering
+- [x] **(10%) Sign-up:** Bruker kan opprette konto med e-post og passord (Supabase Auth).
+- [x] **(10%) Email template:** Sign-up e-posttemplate er endret i Supabase (Emails → Confirm sign up).
+- [x] **(10%) Login/Logout:** Bruker må være logget inn for å få tilgang til appens funksjonalitet (Jobb Notater er låst bak login).
+- [x] **(5%) Credentials:** Bruker forblir innlogget etter å lukke/åpne appen igjen (session lagres lokalt av Supabase-klienten).
 
-2. Start the app
+### Database
+- [x] **(5%) Auth-kobling:** Kun innloggede brukere har tilgang til database via RLS policies (applied to: authenticated).
+- [x] **(10%) Create:** Bruker kan opprette notat med feltene:
+  - `title` (tittel)
+  - `content` (tekst)
+  - `user_id` (brukeren som opprettet notatet)
+  - `updated_at` (tidspunkt sist endret)
+- [x] **(10%) Read:** Alle notater fra alle brukere vises i skjermen **"Jobb Notater"** (SELECT for authenticated).
+- [x] **(10%) Update:** Bruker kan oppdatere egne notater (RLS: `auth.uid() = user_id`).
+- [x] **(10%) Delete:** Bruker kan slette egne notater med bekreftelse før sletting (RLS: `auth.uid() = user_id`).
 
-   ```bash
-   npx expo start
-   ```
+### Validering
+- [x] **(5%) Ingen tomme felter i notater:** Appen hindrer lagring hvis tittel eller tekst er tom, og viser tydelig feilmelding i UI.
+- [x] **(5%) Ingen tomme felter i brukernavn og passord:** Appen hindrer login/signup hvis e-post eller passord er tomt, med tydelig feilmelding.
+- [x] **(5%) Success:** Appen viser tydelig bekreftelse når notat er lagret/oppdatert/slettet.
 
-In the output, you'll find options to open the app in a
+### Visualisering
+- [x] **(5%) ER-diagram:** `ER-Diagram.png` viser relasjonen mellom Supabase Auth (users) og notes-tabellen.
+- [x] **(5%) Sekvensdiagram:** `Sekvens-Diagram.png` viser flyt for å lage et notat (app ↔ auth ↔ database).
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+## Database sikkerhet (RLS)
+Tabellen `public.notes` har Row Level Security aktivert.
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+Policies:
+- SELECT: alle innloggede kan lese alle notater
+- INSERT: kun egne notater (`auth.uid() = user_id`)
+- UPDATE: kun egne notater (`auth.uid() = user_id`)
+- DELETE: kun egne notater (`auth.uid() = user_id`)
 
-## Get a fresh project
+## Video
+Se `video.mp4` (3–5 min) for demo av:
+- Signup/Login/Logout
+- CRUD (create/read/update/delete) med oppdatering i database
+- Validering og suksessmeldinger
+- Bekreftelse før sletting
+- RLS-effekt (kun eier kan endre/slette)
 
-When you're ready, run:
-
-```bash
-npm run reset-project
-```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.

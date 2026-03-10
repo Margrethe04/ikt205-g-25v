@@ -1,3 +1,4 @@
+import * as Notifications from "expo-notifications";
 import { Tabs } from 'expo-router';
 import React from 'react';
 
@@ -5,6 +6,15 @@ import { HapticTab } from '@/components/haptic-tab';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+
+Notifications.setNotificationHandler({
+  handleNotification: async () =>
+    ({
+      shouldShowAlert: true,
+      shouldPlaySound: false,
+      shouldSetBadge: false,
+    } as any),
+});
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();

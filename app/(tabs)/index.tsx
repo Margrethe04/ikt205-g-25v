@@ -1,98 +1,144 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
-
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+import { useEffect, useState } from "react";
+import { Alert, Pressable, Text, TextInput, View } from "react-native";
+import { supabase } from "../../lib/supabase";
 
 export default function HomeScreen() {
-  return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+  const [session, setSession] = useState<any>(null);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => setSession(data.session));
+
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    return () => listener.subscription.unsubscribe();
+  }, []);
+
+  const validate = () => {
+    if (!email.trim() || !password.trim()) {
+      Alert.alert("Feil", "E-post og passord kan ikke være tomme.");
+      return false;
+    }
+    return true;
+  };
+
+  const signUp = async () => {
+  try {
+
+    const e = email.trim();
+    const p = password.trim();
+
+    if (!e || !p) {
+      alert("Tomme felt!");
+      return;
+    }
+
+    const { data, error } = await supabase.auth.signUp({
+      email: e,
+      password: p,
+    });
+
+    if (error) {
+      alert("SIGNUP FEIL: " + error.message);
+      return;
+    }
+
+  } catch (err: any) {
+    alert("CRASH: " + (err?.message ?? String(err)));
+  }
+};
+
+
+  const signIn = async () => {
+  try {
+    
+
+    const e = email.trim();
+    const p = password.trim();
+
+    if (!e || !p) {
+      alert("E-post/passord kan ikke være tomt");
+      return;
+    }
+
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: e,
+      password: p,
+    });
+
+    if (error) {
+      alert("FEIL: " + error.message);
+      return;
+    }
+
+    
+  } catch (err: any) {
+    alert("CRASH: " + (err?.message ?? String(err)));
+  }
+};
+
+
+  const signOut = async () => {
+  try {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      Alert.alert("Feil", error.message);
+      return;
+    }
+    Alert.alert("OK", "Du er logget ut.");
+  } catch (err: any) {
+    Alert.alert("CRASH", err?.message ?? String(err));
+  }
+};
+
+  if (session) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center", gap: 12 }}>
+        <Text style={{ fontSize: 22, fontWeight: "700" }}>Du er innlogget</Text>
+        <Pressable onPress={signOut} style={{ padding: 12, borderWidth: 1, borderRadius: 10 }}>
+          <Text>Logg ut</Text>
+        </Pressable>
+      </View>
+    );
+  }
+
+ return (
+  <View style={{ flex: 1, padding: 20, justifyContent: "center", gap: 12, pointerEvents: "box-none" as any }}>
+      <Text style={{ fontSize: 28, fontWeight: "700" }}>Cloud Notes</Text>
+
+      <TextInput
+        placeholder="E-post"
+        value={email}
+        onChangeText={setEmail}
+        autoCapitalize="none"
+        style={{ borderWidth: 1, padding: 12, borderRadius: 10 }}
+      />
+
+      <TextInput
+        placeholder="Passord"
+        value={password}
+        onChangeText={setPassword}
+        secureTextEntry
+        style={{ borderWidth: 1, padding: 12, borderRadius: 10 }}
+      />
+
+      <Pressable
+        onPress={signIn}
+        style={{ padding: 12, borderRadius: 10, borderWidth: 1, cursor: "pointer" as any, borderColor: "#af4ca8" }}
+      >
+        <Text>Logg inn</Text>
+      </Pressable>
+
+
+      <Pressable 
+        onPress={signUp} 
+        style={{ padding: 12, borderRadius: 10, borderWidth: 1, cursor: "pointer" as any, borderColor: "#af4ca8" }}
+        >
+        <Text>Opprett konto</Text>
+      </Pressable>
+    </View>
   );
 }
-
-const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-  },
-});
