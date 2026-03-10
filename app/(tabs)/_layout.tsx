@@ -10,7 +10,8 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 Notifications.setNotificationHandler({
   handleNotification: async () =>
     ({
-      shouldShowAlert: true,
+      shouldShowBanner: true,
+      shouldShowList: true,
       shouldPlaySound: false,
       shouldSetBadge: false,
     } as any),
