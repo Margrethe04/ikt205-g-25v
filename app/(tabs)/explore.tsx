@@ -129,9 +129,10 @@ export default function ExploreScreen() {
       if (!alive) return;
       setPage(0);
       await refreshUser();
+      await ensureLocalNotificationPermissions();
       if (!alive) return;
       await loadNotes(0, false);
-    };
+};
 
     init();
 
@@ -248,7 +249,7 @@ export default function ExploreScreen() {
       ]);
 
       if (insErr) return setStatusMsg(insErr.message);
-
+      
       await ensureLocalNotificationPermissions();
       await localNotifyNewNote(title.trim());
 

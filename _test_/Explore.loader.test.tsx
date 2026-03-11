@@ -32,6 +32,7 @@ jest.mock("../lib/supabase", () => ({
               user_id: "123",
               updated_at: new Date().toISOString(),
               created_at: new Date().toISOString(),
+              image_url: null,
             },
           ],
           error: null,
@@ -41,10 +42,29 @@ jest.mock("../lib/supabase", () => ({
   },
 }));
 
+jest.mock("../utils/notifications", () => ({
+  ensureLocalNotificationPermissions: jest.fn(() => Promise.resolve()),
+  localNotifyNewNote: jest.fn(() => Promise.resolve()),
+}));
+
+jest.mock("../utils/imagePicker", () => ({
+  pickFromGallery: jest.fn(),
+  requestImagePermissions: jest.fn(),
+  takePhoto: jest.fn(),
+}));
+
+jest.mock("../utils/imageValidation", () => ({
+  validateImageOrThrow: jest.fn(() => Promise.resolve()),
+}));
+
+jest.mock("../utils/uploadToSupabase", () => ({
+  uploadImageAndGetPublicUrl: jest.fn(() =>
+    Promise.resolve({ publicUrl: "https://example.com/test.jpg" })
+  ),
+}));
+
 describe("Explore loader", () => {
-
   test("viser loader mens notater lastes", async () => {
-
     render(<ExploreScreen />);
 
     expect(screen.getByText("Laster...")).toBeTruthy();
@@ -52,7 +72,5 @@ describe("Explore loader", () => {
     await waitFor(() => {
       expect(screen.getByText("Test")).toBeTruthy();
     });
-
   });
-
 });
